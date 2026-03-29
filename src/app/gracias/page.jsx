@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 
 export default function GraciasPage() {
@@ -70,26 +72,16 @@ export default function GraciasPage() {
           }}
         >
           <h1 style={{ fontFamily: "Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#fff", marginBottom: "1rem" }}>
-            ¡Gracias por Tu{" "}
-            <span style={{
-              background: "linear-gradient(90deg, #c9a84c 0%, #e8c97a 35%, #fff8dc 55%, #e8c97a 75%, #c9a84c 100%)",
-              backgroundSize: "200% auto",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}>
-              Solicitud!
-            </span>
+            {"¡Gracias por Tu Solicitud!"}
           </h1>
 
           {/* Divider */}
           <div style={{ width: "72px", height: "2px", background: "linear-gradient(90deg, transparent, #c9a84c, transparent)", margin: "0 auto 1.5rem" }} />
 
           <p style={{ color: "rgba(255,255,255,0.6)", lineHeight: 1.7, marginBottom: "1.5rem" }}>
-            Hemos recibido tu información con éxito. Un asesor de{" "}
-            <strong style={{ color: "#e8c97a" }}>Empire Investments</strong> se
-            pondrá en contacto contigo muy pronto para ofrecerte una consulta
-            personalizada y sin compromiso.
+            {"Hemos recibido tu información con éxito. Un asesor de "}
+            <strong style={{ color: "#e8c97a" }}>Empire Investments</strong>
+            {" se pondrá en contacto contigo muy pronto para ofrecerte una consulta personalizada y sin compromiso."}
           </p>
 
           {/* Steps */}
@@ -104,48 +96,47 @@ export default function GraciasPage() {
             }}
           >
             <p style={{ color: "#e8c97a", fontSize: "0.7rem", fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "1rem" }}>
-              ¿Qué Sigue?
+              {"¿Qué Sigue?"}
             </p>
             {[
               "Revisamos tu información detalladamente",
               "Un asesor te contactará en las próximas horas",
               "Recibes una propuesta personalizada sin costo",
-            ].map((text, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: i < 2 ? "0.75rem" : 0 }}>
-                <span
-                  style={{
-                    width: "1.75rem",
-                    height: "1.75rem",
-                    borderRadius: "50%",
-                    border: "1px solid rgba(201,168,76,0.4)",
-                    backgroundColor: "rgba(201,168,76,0.08)",
-                    color: "#e8c97a",
-                    fontSize: "0.75rem",
-                    fontWeight: 900,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>{text}</p>
-              </div>
-            ))}
+            ].map(function(text, i) {
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: i < 2 ? "0.75rem" : 0 }}>
+                  <span
+                    style={{
+                      width: "1.75rem",
+                      height: "1.75rem",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(201,168,76,0.4)",
+                      backgroundColor: "rgba(201,168,76,0.08)",
+                      color: "#e8c97a",
+                      fontSize: "0.75rem",
+                      fontWeight: 900,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem" }}>{text}</p>
+                </div>
+              );
+            })}
           </div>
 
           <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.75rem", lineHeight: 1.6 }}>
-            📞 Por favor ten tu teléfono disponible. Nuestro asesor te llamará pronto para programar tu consulta gratuita.
+            {"📞 Por favor ten tu teléfono disponible. Nuestro asesor te llamará pronto para programar tu consulta gratuita."}
           </p>
         </div>
 
         {/* Back link */}
-        <Link
-          href="/"
-          style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.875rem", textDecoration: "none" }}
-        >
-          ← Volver al inicio
+        <Link href="/" style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.875rem", textDecoration: "none" }}>
+          {"← Volver al inicio"}
         </Link>
       </div>
     </main>
