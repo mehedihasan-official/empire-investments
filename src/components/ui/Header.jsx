@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import logo from "../../../public/empire-logo.png"
 
 export default function Header() {
   return (
@@ -10,17 +11,16 @@ export default function Header() {
 
         {/* ── Logo ──────────────────────────────────────── */}
         <Link href="/" className="flex items-center gap-3 group">
-          {/*
-            Replace the placeholder div below with your actual logo:
+          
             <Image
-              src="/logo.png"
+              src={logo}
               alt="Empire Investments"
-              width={140}
+              
               height={40}
               priority
             />
-          */}
-          <div className="w-10 h-10 rounded-full bg-gold-500/15 border border-gold-500/50 flex items-center justify-center">
+         
+          {/* <div className="w-10 h-10 rounded-full bg-gold-500/15 border border-gold-500/50 flex items-center justify-center">
             <span className="text-gold-400 font-display font-bold text-sm">EI</span>
           </div>
           <div className="leading-none">
@@ -28,7 +28,7 @@ export default function Header() {
             <p className="text-gold-400 font-display text-[10px] tracking-[0.2em] uppercase">
               Investments
             </p>
-          </div>
+          </div> */}
         </Link>
 
         {/* ── CTA ───────────────────────────────────────── */}
