@@ -1,26 +1,280 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap");
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ── Tailwind v4: custom theme tokens ──────────────────────── */
+@theme {
+  /* Colors */
+  --color-navy-950: #04090f;
+  --color-navy-900: #0a1628;
+  --color-navy-800: #0d1f3c;
+  --color-navy-700: #112848;
+  --color-gold-300: #f5e6a3;
+  --color-gold-400: #e8c97a;
+  --color-gold-500: #c9a84c;
+  --color-gold-600: #a8883a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Fonts */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Lato", "Helvetica Neue", sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Animations */
+  --animate-fade-up: fadeUp 0.8s ease forwards;
+  --animate-fade-in: fadeIn 0.6s ease forwards;
+  --animate-shimmer: shimmer 3s linear infinite;
+  --animate-pulse-gold: pulseGold 2s ease-in-out infinite;
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% center; }
+    to   { background-position:  200% center; }
+  }
+  @keyframes pulseGold {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Base ───────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
 }
+
+body {
+  background-color: var(--color-navy-900);
+  color: #ffffff;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Gold shimmer text ──────────────────────────────────────── */
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-gold-500) 0%,
+    var(--color-gold-400) 35%,
+    #fff8dc 55%,
+    var(--color-gold-400) 75%,
+    var(--color-gold-500) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Decorative gold divider ────────────────────────────────── */
+.gold-divider {
+  width: 72px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-500), transparent);
+  margin: 0 auto;
+}
+
+/* ── Geometric grid background ──────────────────────────────── */
+.geo-bg {
+  background-image:
+    linear-gradient(rgba(201, 168, 76, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 168, 76, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── Form inputs ────────────────────────────────────────────── */
+.form-input {
+  width: 100%;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  background-color: rgba(4, 9, 15, 0.6);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.form-input:focus {
+  border-color: var(--color-gold-500);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+
+.form-input option {
+  background-color: #0d1f3c;
+  color: white;
+}
+
+/* ── Gold CTA button ────────────────────────────────────────── */
+.btn-gold {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-gold-500) 0%, var(--color-gold-400) 50%, var(--color-gold-500) 100%);
+  background-size: 200% auto;
+  color: var(--color-navy-950);
+  font-family: var(--font-body);
+  font-weight: 900;
+  border-radius: 0.5rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background-position 0.3s;
+  box-shadow: 0 4px 24px rgba(201, 168, 76, 0.3);
+  border: none;
+}
+
+.btn-gold:hover {
+  transform: scale(1.02);
+  background-position: right center;
+  box-shadow: 0 6px 32px rgba(201, 168, 76, 0.45);
+}
+
+.btn-gold:active {
+  transform: scale(0.98);
+}
+
+.btn-gold:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Card hover ─────────────────────────────────────────────── */
+.card-hover {
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.card-hover:hover {
+  border-color: rgba(201, 168, 76, 0.45);
+  box-shadow: 0 8px 40px rgba(201, 168, 76, 0.08);
+  transform: translateY(-2px);
+}
+
+/* ── Form label & error helpers ─────────────────────────────── */
+.form-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-gold-400);
+  margin-bottom: 6px;
+}
+
+.field-error {
+  margin-top: 5px;
+  font-size: 0.78rem;
+  color: #f87171;
+}
+
+/* ── Scroll reveal ──────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Custom color utilities (replaces tailwind.config.js) ───── */
+/* Background colors */
+.bg-navy-950  { background-color: var(--color-navy-950); }
+.bg-navy-900  { background-color: var(--color-navy-900); }
+.bg-navy-800  { background-color: var(--color-navy-800); }
+.bg-navy-700  { background-color: var(--color-navy-700); }
+.bg-gold-300  { background-color: var(--color-gold-300); }
+.bg-gold-400  { background-color: var(--color-gold-400); }
+.bg-gold-500  { background-color: var(--color-gold-500); }
+.bg-gold-600  { background-color: var(--color-gold-600); }
+
+/* Text colors */
+.text-navy-950  { color: var(--color-navy-950); }
+.text-navy-900  { color: var(--color-navy-900); }
+.text-gold-300  { color: var(--color-gold-300); }
+.text-gold-400  { color: var(--color-gold-400); }
+.text-gold-500  { color: var(--color-gold-500); }
+.text-gold-600  { color: var(--color-gold-600); }
+
+/* Border colors */
+.border-gold-400 { border-color: var(--color-gold-400); }
+.border-gold-500 { border-color: var(--color-gold-500); }
+.border-gold-600 { border-color: var(--color-gold-600); }
+.border-navy-800 { border-color: var(--color-navy-800); }
+
+/* Opacity variants used in components */
+.bg-navy-800\/30  { background-color: rgba(13, 31, 60, 0.30); }
+.bg-navy-800\/40  { background-color: rgba(13, 31, 60, 0.40); }
+.bg-navy-800\/50  { background-color: rgba(13, 31, 60, 0.50); }
+.bg-navy-800\/55  { background-color: rgba(13, 31, 60, 0.55); }
+.bg-navy-800\/60  { background-color: rgba(13, 31, 60, 0.60); }
+.bg-navy-950\/50  { background-color: rgba(4,  9,  15, 0.50); }
+.bg-navy-950\/60  { background-color: rgba(4,  9,  15, 0.60); }
+.bg-gold-500\/4   { background-color: rgba(201,168,76, 0.04); }
+.bg-gold-500\/8   { background-color: rgba(201,168,76, 0.08); }
+.bg-gold-500\/10  { background-color: rgba(201,168,76, 0.10); }
+.bg-gold-500\/12  { background-color: rgba(201,168,76, 0.12); }
+.bg-gold-500\/15  { background-color: rgba(201,168,76, 0.15); }
+.bg-gold-500\/20  { background-color: rgba(201,168,76, 0.20); }
+.bg-red-500\/10   { background-color: rgba(239,68, 68, 0.10); }
+.bg-red-400\/10   { background-color: rgba(248,113,113,0.10); }
+
+/* Border opacity variants */
+.border-gold-500\/10  { border-color: rgba(201,168,76, 0.10); }
+.border-gold-500\/12  { border-color: rgba(201,168,76, 0.12); }
+.border-gold-500\/15  { border-color: rgba(201,168,76, 0.15); }
+.border-gold-500\/20  { border-color: rgba(201,168,76, 0.20); }
+.border-gold-500\/25  { border-color: rgba(201,168,76, 0.25); }
+.border-gold-500\/30  { border-color: rgba(201,168,76, 0.30); }
+.border-gold-500\/35  { border-color: rgba(201,168,76, 0.35); }
+.border-gold-500\/40  { border-color: rgba(201,168,76, 0.40); }
+.border-gold-500\/45  { border-color: rgba(201,168,76, 0.45); }
+.border-gold-500\/50  { border-color: rgba(201,168,76, 0.50); }
+.border-gold-500\/60  { border-color: rgba(201,168,76, 0.60); }
+.border-gold-400\/60  { border-color: rgba(232,201,122,0.60); }
+.border-white\/15     { border-color: rgba(255,255,255,0.15); }
+.border-white\/20     { border-color: rgba(255,255,255,0.20); }
+.border-white\/30     { border-color: rgba(255,255,255,0.30); }
+.border-white\/40     { border-color: rgba(255,255,255,0.40); }
+.border-red-500\/30   { border-color: rgba(239,68, 68, 0.30); }
+.border-red-400\/30   { border-color: rgba(248,113,113,0.30); }
+
+/* Text opacity variants */
+.text-white\/25  { color: rgba(255,255,255,0.25); }
+.text-white\/30  { color: rgba(255,255,255,0.30); }
+.text-white\/35  { color: rgba(255,255,255,0.35); }
+.text-white\/40  { color: rgba(255,255,255,0.40); }
+.text-white\/45  { color: rgba(255,255,255,0.45); }
+.text-white\/50  { color: rgba(255,255,255,0.50); }
+.text-white\/55  { color: rgba(255,255,255,0.55); }
+.text-white\/60  { color: rgba(255,255,255,0.60); }
+.text-white\/65  { color: rgba(255,255,255,0.65); }
+.text-white\/70  { color: rgba(255,255,255,0.70); }
+.text-gold-400\/60  { color: rgba(232,201,122,0.60); }
+.text-gold-400\/70  { color: rgba(232,201,122,0.70); }
+.text-gold-500\/20  { color: rgba(201,168,76, 0.20); }
+.text-gold-500\/40  { color: rgba(201,168,76, 0.40); }
+.text-gold-500\/50  { color: rgba(201,168,76, 0.50); }
+.text-gold-500\/70  { color: rgba(201,168,76, 0.70); }
+
+/* Font family */
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+
+/* Animations */
+.animate-fade-up    { animation: var(--animate-fade-up); }
+.animate-fade-in    { animation: var(--animate-fade-in); }
+.animate-shimmer    { animation: var(--animate-shimmer); }
+.animate-pulse_gold { animation: var(--animate-pulse-gold); }

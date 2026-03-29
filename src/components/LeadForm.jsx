@@ -329,24 +329,6 @@ export default function LeadForm() {
       <p className="text-center text-white/25 text-xs leading-relaxed">
         🔒 Tu información es 100% confidencial. Sin compromisos. Sin costos.
       </p>
-
-      {/* Inline styles for reusable label/error classes */}
-      <style jsx>{`
-        :global(.form-label) {
-          display: block;
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #e8c97a;
-          margin-bottom: 6px;
-        }
-        :global(.field-error) {
-          margin-top: 5px;
-          font-size: 0.78rem;
-          color: #f87171;
-        }
-      `}</style>
     </form>
   );
 }
