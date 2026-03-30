@@ -73,7 +73,7 @@ export default function SignIn() {
 
       // Redirect after a short delay to show success message
       setTimeout(() => {
-        router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
+        router.push(isAdmin ? "/admin" : "/dashboard");
       }, 1500);
     } catch (error) {
       setServerError(
@@ -116,7 +116,7 @@ export default function SignIn() {
 
         // Redirect after a short delay to show success message
         setTimeout(() => {
-          router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
+         router.push(isAdmin ? "/admin" : "/dashboard");
         }, 1500);
       } else {
         router.push("/dashboard/user");
