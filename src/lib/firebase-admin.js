@@ -7,19 +7,41 @@ let initError = null;
 // Function to parse the private key from environment variable
 function parsePrivateKey() {
   let key = process.env.FIREBASE_PRIVATE_KEY;
-  
+
   if (!key) {
     throw new Error("FIREBASE_PRIVATE_KEY is not set");
   }
 
+  // Log the first few characters to debug (without exposing the full key)
+  console.log("Private key starts with:", key.substring(0, 50) + "...");
+
   // Remove surrounding quotes if present (happens when pasted into Vercel UI)
   if (key.startsWith('"') && key.endsWith('"')) {
     key = key.slice(1, -1);
+    console.log("Removed surrounding quotes");
   }
 
-  // Handle escaped newlines: replace literal \n with actual newlines
-  key = key.replace(/\\n/g, "\n");
+  // Check if the key already has actual newlines (from .env.local)
+  if (key.includes('\n')) {
+    console.log("Key already has actual newlines");
+    return key;
+  }
 
+  // If no actual newlines, try replacing escaped newlines
+  if (key.includes('\\n')) {
+    key = key.replace(/\\n/g, "\n");
+    console.log("Replaced escaped newlines with actual newlines");
+  }
+
+  console.log("After processing, key starts with:", key.substring(0, 50) + "...");
+
+  // Ensure the key starts and ends with the correct PEM headers
+  if (!key.includes("-----BEGIN PRIVATE KEY-----") || !key.includes("-----END PRIVATE KEY-----")) {
+    console.error("Invalid private key format - missing PEM headers");
+    throw new Error("Invalid private key format: missing PEM headers");
+  }
+
+  console.log("Private key format appears valid");
   return key;
 }
 
@@ -27,7 +49,7 @@ function parsePrivateKey() {
 try {
   if (getApps().length === 0) {
     const privateKey = parsePrivateKey();
-    
+
     adminApp = initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
