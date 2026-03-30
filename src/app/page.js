@@ -10,7 +10,7 @@ import BottomCTA from "@/components/sections/BottomCTA";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+    
       <main className="flex flex-col flex-1">
         <Hero />
         <Services />
@@ -19,7 +19,6 @@ export default function Home() {
         <Testimonials />
         <BottomCTA />
       </main>
-      <Footer />
     </div>
   );
 }

@@ -1,5 +1,7 @@
+import Header from "@/components/ui/Header";
 import "./globals.css";
 import { FacebookPixelProvider } from "@/components/FacebookPixel";
+import Footer from "@/components/ui/Footer";
 
 export const metadata = {
   title: "Empire Investments | Seguro de Vida IUL – Protege Tu Familia",
@@ -36,7 +38,9 @@ export default function RootLayout({ children }) {
       <body className="text-white antialiased" style={{ backgroundColor: 'var(--color-navy-900)', fontFamily: 'var(--font-body)' }}>
         {/* Tracks PageView on every route change */}
         <FacebookPixelProvider />
+        <Header/>
         {children}
+        <Footer/>
       </body>
     </html>
   );
