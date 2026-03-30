@@ -1,21 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { trackLeadEvent } from "@/components/FacebookPixel";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 // All US states except NY and Alaska (per client requirements)
 const US_STATES = [
-  "Alabama", "Arizona", "Arkansas", "California", "Colorado",
-  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii",
-  "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
-  "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
-  "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska",
-  "Nevada", "New Hampshire", "New Jersey", "New Mexico",
-  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
-  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
-  "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
-  "Washington", "West Virginia", "Wisconsin", "Wyoming",
+  "Alabama",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia",
+  "Hawaii",
+  "Idaho",
+  "Illinois",
+  "Indiana",
+  "Iowa",
+  "Kansas",
+  "Kentucky",
+  "Louisiana",
+  "Maine",
+  "Maryland",
+  "Massachusetts",
+  "Michigan",
+  "Minnesota",
+  "Mississippi",
+  "Missouri",
+  "Montana",
+  "Nebraska",
+  "Nevada",
+  "New Hampshire",
+  "New Jersey",
+  "New Mexico",
+  "North Carolina",
+  "North Dakota",
+  "Ohio",
+  "Oklahoma",
+  "Oregon",
+  "Pennsylvania",
+  "Rhode Island",
+  "South Carolina",
+  "South Dakota",
+  "Tennessee",
+  "Texas",
+  "Utah",
+  "Vermont",
+  "Virginia",
+  "Washington",
+  "West Virginia",
+  "Wisconsin",
+  "Wyoming",
 ];
 
 const INVESTMENT_OPTIONS = [
@@ -69,8 +107,10 @@ export default function LeadForm() {
     }
 
     if (!form.tieneIUL) newErrors.tieneIUL = "Por favor selecciona una opción.";
-    if (!form.dondeInvierte) newErrors.dondeInvierte = "Por favor selecciona una opción.";
-    if (!form.cuantoInvertir) newErrors.cuantoInvertir = "Por favor selecciona un monto.";
+    if (!form.dondeInvierte)
+      newErrors.dondeInvierte = "Por favor selecciona una opción.";
+    if (!form.cuantoInvertir)
+      newErrors.cuantoInvertir = "Por favor selecciona un monto.";
 
     return newErrors;
   };
@@ -116,7 +156,8 @@ export default function LeadForm() {
       router.push("/gracias");
     } catch (err) {
       setServerError(
-        err.message || "Ocurrió un error inesperado. Por favor inténtalo de nuevo."
+        err.message ||
+          "Ocurrió un error inesperado. Por favor inténtalo de nuevo.",
       );
     } finally {
       setLoading(false);
@@ -125,7 +166,6 @@ export default function LeadForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
-
       {/* ── 1. Nombre ─────────────────────────────────────────────────── */}
       <div>
         <label className="form-label">
@@ -156,7 +196,9 @@ export default function LeadForm() {
         >
           <option value="">Selecciona tu estado</option>
           {US_STATES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
         {errors.estado && <p className="field-error">{errors.estado}</p>}
@@ -193,9 +235,10 @@ export default function LeadForm() {
                 key={opt}
                 className={`flex-1 flex items-center justify-center gap-2.5 cursor-pointer
                   px-4 py-3 rounded-lg border transition-all duration-200 select-none
-                  ${selected
-                    ? "border-gold-500 bg-gold-500/10 text-gold-400"
-                    : "border-white/15 text-white/50 hover:border-gold-500/40 hover:text-white/70"
+                  ${
+                    selected
+                      ? "border-gold-500 bg-gold-500/10 text-gold-400"
+                      : "border-white/15 text-white/50 hover:border-gold-500/40 hover:text-white/70"
                   }`}
               >
                 <input
@@ -226,7 +269,8 @@ export default function LeadForm() {
       {/* ── 5. ¿Dónde inviertes? ──────────────────────────────────────── */}
       <div>
         <label className="form-label">
-          ¿Dónde estás invirtiendo actualmente? <span className="text-red-400">*</span>
+          ¿Dónde estás invirtiendo actualmente?{" "}
+          <span className="text-red-400">*</span>
         </label>
         <select
           name="dondeInvierte"
@@ -240,7 +284,9 @@ export default function LeadForm() {
           <option value="Banco">Banco</option>
           <option value="Otro">Otro</option>
         </select>
-        {errors.dondeInvierte && <p className="field-error">{errors.dondeInvierte}</p>}
+        {errors.dondeInvierte && (
+          <p className="field-error">{errors.dondeInvierte}</p>
+        )}
       </div>
 
       {/* ── 6. ¿Para qué el IUL? (optional) ──────────────────────────── */}
@@ -262,7 +308,8 @@ export default function LeadForm() {
       {/* ── 7. ¿Cuánto invertir? ──────────────────────────────────────── */}
       <div>
         <label className="form-label">
-          ¿Cuánto estás buscando invertir? <span className="text-red-400">*</span>
+          ¿Cuánto estás buscando invertir?{" "}
+          <span className="text-red-400">*</span>
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
           {INVESTMENT_OPTIONS.map((opt) => {
@@ -272,9 +319,10 @@ export default function LeadForm() {
                 key={opt.value}
                 className={`cursor-pointer text-center px-3 py-2.5 rounded-lg border
                   text-sm font-bold transition-all duration-200 select-none
-                  ${selected
-                    ? "border-gold-500 bg-gold-500/10 text-gold-400"
-                    : "border-white/15 text-white/50 hover:border-gold-500/40 hover:text-white/70"
+                  ${
+                    selected
+                      ? "border-gold-500 bg-gold-500/10 text-gold-400"
+                      : "border-white/15 text-white/50 hover:border-gold-500/40 hover:text-white/70"
                   }`}
               >
                 <input
@@ -290,7 +338,9 @@ export default function LeadForm() {
             );
           })}
         </div>
-        {errors.cuantoInvertir && <p className="field-error">{errors.cuantoInvertir}</p>}
+        {errors.cuantoInvertir && (
+          <p className="field-error">{errors.cuantoInvertir}</p>
+        )}
       </div>
 
       {/* ── Server error ──────────────────────────────────────────────── */}
@@ -316,8 +366,19 @@ export default function LeadForm() {
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
             Enviando...
           </span>

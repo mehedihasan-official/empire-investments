@@ -1,7 +1,8 @@
-import Header from "@/components/ui/Header";
-import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
 import { FacebookPixelProvider } from "@/components/FacebookPixel";
 import Footer from "@/components/ui/Footer";
+import Header from "@/components/ui/Header";
+import "./globals.css";
 
 export const metadata = {
   title: "Empire Investments | Seguro de Vida IUL – Protege Tu Familia",
@@ -19,7 +20,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         {/* Facebook Pixel noscript fallback */}
         {process.env.NEXT_PUBLIC_FB_PIXEL_ID && (
@@ -35,12 +36,18 @@ export default function RootLayout({ children }) {
           </noscript>
         )}
       </head>
-      <body className="text-white antialiased" style={{ backgroundColor: 'var(--color-navy-900)', fontFamily: 'var(--font-body)' }}>
-        {/* Tracks PageView on every route change */}
-        <FacebookPixelProvider />
-        <Header/>
-        {children}
-        <Footer/>
+      <body 
+        className="text-white antialiased" 
+        style={{ backgroundColor: 'var(--color-navy-900)', fontFamily: 'var(--font-body)' }}
+        suppressHydrationWarning
+      >
+        <AuthProvider>
+          {/* Tracks PageView on every route change */}
+          <FacebookPixelProvider />
+          <Header/>
+          {children}
+          <Footer/>
+        </AuthProvider>
       </body>
     </html>
   );
