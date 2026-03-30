@@ -47,24 +47,34 @@ export default function SignIn() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Get user role from MongoDB to determine redirect
+      // Get ID token
       const token = await result.user.getIdToken();
-      const response = await fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
+
+      // Register or get user profile from MongoDB (creates if not exists)
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          displayName: result.user.displayName || "",
+          photoURL: result.user.photoURL || "",
+        }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setSuccessMessage("Successfully signed in! Redirecting...");
-        const isAdmin = data.user?.role === "admin";
-
-        // Redirect after a short delay to show success message
-        setTimeout(() => {
-          router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
-        }, 1500);
-      } else {
-        router.push("/dashboard/user");
+      if (!response.ok) {
+        throw new Error("Failed to authenticate user");
       }
+
+      const data = await response.json();
+      setSuccessMessage("Successfully signed in! Redirecting...");
+      const isAdmin = data.user?.role === "admin";
+
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
+      }, 1500);
     } catch (error) {
       setServerError(
         error.code === "auth/popup-closed-by-user"
