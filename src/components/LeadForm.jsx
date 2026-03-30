@@ -20,10 +20,10 @@ const US_STATES = [
 
 const INVESTMENT_OPTIONS = [
   { value: "$200", label: "$200" },
+  { value: "$300", label: "$300" },
   { value: "$400", label: "$400" },
-  { value: "$500 - $1,000", label: "$500 – $1,000" },
-  { value: "$1,500 - $3,000", label: "$1,500 – $3,000" },
-  { value: "$3,500 - $7,000", label: "$3,500 – $7,000" },
+  { value: "$500", label: "$500" },
+  { value: "$1,000", label: "$1,000" },
 ];
 
 const INITIAL_FORM = {
