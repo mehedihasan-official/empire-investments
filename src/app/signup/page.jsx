@@ -81,7 +81,7 @@ export default function SignUp() {
 
       // Redirect after a short delay to show success message
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/dashboard/user");
       }, 1500);
     } catch (error) {
       setServerError(
