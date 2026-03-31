@@ -14,7 +14,9 @@ export async function GET() {
       privateKeyStart: process.env.FIREBASE_PRIVATE_KEY?.substring(0, 40) || "MISSING",
       privateKeyHasRealNewlines:   process.env.FIREBASE_PRIVATE_KEY?.includes("\n") || false,
       privateKeyHasEscapedNewlines: process.env.FIREBASE_PRIVATE_KEY?.includes("\\n") || false,
-      privateKeyHasBeginMarker: process.env.FIREBASE_PRIVATE_KEY?.includes("BEGIN PRIVATE KEY") || false,
+      privateKeyHasCRLF:            process.env.FIREBASE_PRIVATE_KEY?.includes("\r") || false,
+      privateKeyHasBeginMarker:    process.env.FIREBASE_PRIVATE_KEY?.includes("BEGIN PRIVATE KEY") || false,
+      privateKeyHasEndMarker:      process.env.FIREBASE_PRIVATE_KEY?.includes("END PRIVATE KEY") || false,
     },
     adminInit: null,
     tokenTest: null,
@@ -30,11 +32,13 @@ export async function GET() {
       app = getApps()[0];
       results.adminInit = "reused existing app";
     } else {
-      let key = process.env.FIREBASE_PRIVATE_KEY || "";
+      let key = String(process.env.FIREBASE_PRIVATE_KEY || "").trim();
       // Strip surrounding quotes if present
       if (key.startsWith('"') && key.endsWith('"')) key = key.slice(1, -1);
       // Replace escaped newlines
       if (key.includes("\\n")) key = key.replace(/\\n/g, "\n");
+      // Normalize line endings
+      key = key.replace(/\r/g, "").trim();
 
       app = initializeApp({
         credential: cert({

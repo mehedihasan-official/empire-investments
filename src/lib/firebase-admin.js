@@ -1,6 +1,38 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
+// ── Normalizes and validates a Firebase private key for use with firebase-admin
+function normalizePrivateKey(rawKey) {
+  let key = String(rawKey || "").trim();
+
+  // 1. Strip surrounding quotes Vercel or .env entries sometimes wrap in literal quotes
+  if (key.startsWith('"') && key.endsWith('"')) {
+    key = key.slice(1, -1);
+  }
+
+  // 2. Convert escaped \n into real newline chars
+  if (key.includes("\\n")) {
+    key = key.replace(/\\n/g, "\n");
+  }
+
+  // 3. Normalize line endings to LF
+  key = key.replace(/\r/g, "");
+
+  // 4. Trim again (cleanup trailing whitespace after normalization)
+  key = key.trim();
+
+  const hasBegin = key.includes("-----BEGIN PRIVATE KEY-----");
+  const hasEnd = key.includes("-----END PRIVATE KEY-----");
+
+  if (!hasBegin || !hasEnd) {
+    throw new Error(
+      `FIREBASE_PRIVATE_KEY PEM format invalid. hasBegin=${hasBegin} hasEnd=${hasEnd} length=${key.length}`
+    );
+  }
+
+  return key;
+}
+
 // ── Lazy initialization — runs only when first request comes in ───────────
 // NOT at module load time, so build-time missing env vars won't break it
 function getAdminApp() {
@@ -17,23 +49,7 @@ function getAdminApp() {
     );
   }
 
-  // Handle all private key formats Vercel might produce:
-  let privateKey = rawKey;
-
-  // 1. Strip surrounding quotes Vercel sometimes wraps around the value
-  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-    privateKey = privateKey.slice(1, -1);
-  }
-
-  // 2. Convert escaped \n to real newlines (most common Vercel issue)
-  if (privateKey.includes("\\n")) {
-    privateKey = privateKey.replace(/\\n/g, "\n");
-  }
-
-  // 3. Verify the key looks valid before trying to use it
-  if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
-    throw new Error("FIREBASE_PRIVATE_KEY does not contain expected PEM header. Check Vercel env var format.");
-  }
+  const privateKey = normalizePrivateKey(rawKey);
 
   return initializeApp({
     credential: cert({ projectId, clientEmail, privateKey }),
