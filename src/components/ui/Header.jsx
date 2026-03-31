@@ -11,6 +11,7 @@ export default function Header() {
   const { user, userProfile, isAuthenticated, isAdmin, logout, loading } =
     useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
 
@@ -31,11 +32,15 @@ export default function Header() {
     try {
       await logout();
       setDropdownOpen(false);
+      setMobileMenuOpen(false);
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
+
+  const dashboardPath = isAdmin ? "/dashboard/admin" : "/dashboard/user";
+  const dashboardLabel = isAdmin ? "Admin Dashboard" : "My Dashboard";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-navy-950/90 backdrop-blur-md border-b border-gold-500/20">
@@ -79,62 +84,124 @@ export default function Header() {
             </div>
           )}
 
-          {/* User Dropdown Menu */}
           {!loading && isAuthenticated && (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 hover:bg-navy-800/50 px-3 py-2 rounded-lg transition"
+            <>
+              <Link
+                href={dashboardPath}
+                className="hidden sm:inline text-gray-300 hover:text-gold-400 text-xs sm:text-sm font-semibold uppercase tracking-widest transition"
               >
-                {user?.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={userProfile?.displayName}
-                    className="w-8 h-8 rounded-full border border-gold-400"
-                  />
+                {dashboardLabel}
+              </Link>
+
+              <button
+                onClick={() => setMobileMenuOpen((open) => !open)}
+                className="sm:hidden flex items-center justify-center p-2 rounded-lg text-gray-300 hover:text-gold-400 hover:bg-navy-800/50 transition"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18.3 5.71a1 1 0 0 0-1.41-1.42L12 9.17 7.11 4.29A1 1 0 0 0 5.7 5.7L10.59 10.6 5.7 15.49a1 1 0 0 0 1.41 1.42L12 11.41l4.89 4.89a1 1 0 0 0 1.41-1.42L13.41 10.6l4.89-4.89z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-xs font-bold text-navy-900">
-                    {userProfile?.displayName?.charAt(0).toUpperCase()}
-                  </div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4 5h16a1 1 0 110 2H4a1 1 0 110-2zm0 6h16a1 1 0 110 2H4a1 1 0 110-2zm0 6h16a1 1 0 110 2H4a1 1 0 110-2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 )}
-                <span className="hidden sm:inline text-sm text-white font-semibold">
-                  {userProfile?.displayName?.split(" ")[0]}
-                </span>
               </button>
 
-              {/* Dropdown Menu */}
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-navy-800 border border-gold-500/20 rounded-lg shadow-lg overflow-hidden">
-                  <div className="px-4 py-3 border-b border-gold-500/20">
-                    <p className="text-white font-semibold text-sm">
-                      {userProfile?.displayName}
-                    </p>
-                    <p className="text-gray-400 text-xs">{user?.email}</p>
-                  </div>
+              <div className="relative hidden sm:block" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 hover:bg-navy-800/50 px-3 py-2 rounded-lg transition"
+                  aria-label="User menu"
+                >
+                  {user?.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={userProfile?.displayName}
+                      className="w-8 h-8 rounded-full border border-gold-400"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-linear-to-br from-gold-400 to-gold-600 flex items-center justify-center text-xs font-bold text-navy-900">
+                      {userProfile?.displayName?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-sm text-white font-semibold">
+                    {userProfile?.displayName?.split(" ")[0]}
+                  </span>
+                </button>
 
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-navy-800 border border-gold-500/20 rounded-lg shadow-lg overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gold-500/20">
+                      <p className="text-white font-semibold text-sm">
+                        {userProfile?.displayName}
+                      </p>
+                      <p className="text-gray-400 text-xs">{user?.email}</p>
+                    </div>
+                    <nav className="py-2">
+                      <Link
+                        href={dashboardPath}
+                        onClick={() => setDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gold-400/10 hover:text-gold-400 transition"
+                      >
+                        {dashboardLabel}
+                      </Link>
+                      <Link
+                        href="#"
+                        onClick={() => setDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gold-400/10 hover:text-gold-400 transition opacity-50 cursor-not-allowed"
+                      >
+                        Settings
+                      </Link>
+                      <div className="border-t border-gold-500/20 my-2"></div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 transition"
+                      >
+                        Sign Out
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </div>
+
+              {mobileMenuOpen && (
+                <div className="absolute right-4 top-full mt-2 w-56 bg-navy-800 border border-gold-500/20 rounded-lg shadow-lg overflow-hidden sm:hidden z-50">
                   <nav className="py-2">
-                    {/* Dashboard Link */}
                     <Link
-                      href={isAdmin ? "/dashboard/admin" : "/dashboard/user"}
-                      onClick={() => setDropdownOpen(false)}
+                      href={dashboardPath}
+                      onClick={() => setMobileMenuOpen(false)}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-gold-400/10 hover:text-gold-400 transition"
                     >
-                      {isAdmin ? "Admin Dashboard" : "My Dashboard"}
+                      {dashboardLabel}
                     </Link>
-
-                    {/* Settings */}
                     <Link
                       href="#"
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={() => setMobileMenuOpen(false)}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-gold-400/10 hover:text-gold-400 transition opacity-50 cursor-not-allowed"
                     >
                       Settings
                     </Link>
-
-                    {/* Divider */}
                     <div className="border-t border-gold-500/20 my-2"></div>
-
-                    {/* Sign Out */}
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 transition"
@@ -144,7 +211,7 @@ export default function Header() {
                   </nav>
                 </div>
               )}
-            </div>
+            </>
           )}
 
           {/* Original CTA for non-authenticated users */}
