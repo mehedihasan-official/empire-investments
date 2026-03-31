@@ -1,42 +1,27 @@
+import { verifyToken } from "@/lib/firebase-admin";
 import clientPromise from "@/lib/mongodb";
-import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
-
-// ──── Initialize Firebase Admin ───────────────────────────────────────────
-let adminApp;
-try {
-  if (getApps().length === 0) {
-    adminApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      }),
-    });
-  } else {
-    adminApp = getApps()[0];
-  }
-} catch (error) {
-  console.error("Firebase Admin initialization error:", error);
-}
 
 // ──── Verify Token and Check Admin ──────────────────────────────────────
 async function verifyAdminToken(token) {
   try {
-    const decodedToken = await getAuth(adminApp).verifyIdToken(token);
-    
+    const decodedToken = await verifyToken(token);
+
+    if (!decodedToken) {
+      return null;
+    }
+
     const client = await clientPromise();
     const db = client.db("empire_investments");
     const usersCollection = db.collection("users");
-    
+
     const user = await usersCollection.findOne({ uid: decodedToken.uid });
-    
+
     if (!user || user.role !== "admin") {
       return null;
     }
-    
+
     return decodedToken;
   } catch (error) {
     console.error("Token verification error:", error);

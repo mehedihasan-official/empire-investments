@@ -12,36 +12,43 @@ function parsePrivateKey() {
     throw new Error("FIREBASE_PRIVATE_KEY is not set");
   }
 
-  // Log the first few characters to debug (without exposing the full key)
-  console.log("Private key starts with:", key.substring(0, 50) + "...");
-
   // Remove surrounding quotes if present (happens when pasted into Vercel UI)
   if (key.startsWith('"') && key.endsWith('"')) {
     key = key.slice(1, -1);
-    console.log("Removed surrounding quotes");
   }
 
-  // Check if the key already has actual newlines (from .env.local)
-  if (key.includes('\n')) {
-    console.log("Key already has actual newlines");
+  // Handle different newline formats
+  // 1) If the env var uses actual newline characters (multiline value), keep as-is
+  if (key.includes('\n') && !key.includes('\\n')) {
     return key;
   }
 
-  // If no actual newlines, try replacing escaped newlines
+  // 2) If the env var has escaped newlines (literal backslash+n), convert them
   if (key.includes('\\n')) {
-    key = key.replace(/\\n/g, "\n");
-    console.log("Replaced escaped newlines with actual newlines");
+    key = key.replace(/\\n/g, '\n');
   }
 
-  console.log("After processing, key starts with:", key.substring(0, 50) + "...");
-
-  // Ensure the key starts and ends with the correct PEM headers
-  if (!key.includes("-----BEGIN PRIVATE KEY-----") || !key.includes("-----END PRIVATE KEY-----")) {
-    console.error("Invalid private key format - missing PEM headers");
-    throw new Error("Invalid private key format: missing PEM headers");
+  // 3) If the env var has escaped backslash sequences (double slash), normalize them
+  if (key.includes('\\\\n')) {
+    key = key.replace(/\\\\n/g, '\n');
   }
 
-  console.log("Private key format appears valid");
+  // If no newlines at all, it might be a single line - try to format it
+  if (!key.includes('\n') && key.includes('-----BEGIN PRIVATE KEY-----')) {
+    // This might be a malformed key - try to add newlines
+    key = key.replace(/-----BEGIN PRIVATE KEY-----/, '-----BEGIN PRIVATE KEY-----\n');
+    key = key.replace(/-----END PRIVATE KEY-----/, '\n-----END PRIVATE KEY-----\n');
+    // Add newlines every ~64 characters for base64 content
+    const lines = key.split('\n');
+    const formattedLines = lines.map(line => {
+      if (line.length > 64 && !line.includes('-----')) {
+        return line.match(/.{1,64}/g).join('\n');
+      }
+      return line;
+    });
+    key = formattedLines.join('\n');
+  }
+
   return key;
 }
 
