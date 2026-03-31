@@ -64,7 +64,9 @@ export default function SignIn() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to authenticate user");
+        const errorData = await response.json().catch(() => null);
+        const serverMessage = errorData?.error || `HTTP ${response.status}`;
+        throw new Error(`Failed to authenticate user: ${serverMessage}`);
       }
 
       const data = await response.json();
@@ -116,7 +118,7 @@ export default function SignIn() {
 
         // Redirect after a short delay to show success message
         setTimeout(() => {
-         router.push(isAdmin ? "/admin" : "/dashboard");
+          router.push(isAdmin ? "/admin" : "/dashboard");
         }, 1500);
       } else {
         router.push("/dashboard/user");
