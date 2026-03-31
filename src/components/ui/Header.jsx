@@ -93,39 +93,52 @@ export default function Header() {
                 {dashboardLabel}
               </Link>
 
-              <button
-                onClick={() => setMobileMenuOpen((open) => !open)}
-                className="sm:hidden flex items-center justify-center p-2 rounded-lg text-gray-300 hover:text-gold-400 hover:bg-navy-800/50 transition"
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="h-5 w-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18.3 5.71a1 1 0 0 0-1.41-1.42L12 9.17 7.11 4.29A1 1 0 0 0 5.7 5.7L10.59 10.6 5.7 15.49a1 1 0 0 0 1.41 1.42L12 11.41l4.89 4.89a1 1 0 0 0 1.41-1.42L13.41 10.6l4.89-4.89z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+              <div className="sm:hidden flex items-center gap-2">
+                {user?.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={userProfile?.displayName}
+                    className="w-8 h-8 rounded-full border border-gold-400"
+                  />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="h-5 w-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 5h16a1 1 0 110 2H4a1 1 0 110-2zm0 6h16a1 1 0 110 2H4a1 1 0 110-2zm0 6h16a1 1 0 110 2H4a1 1 0 110-2z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-gold-400 to-gold-600 flex items-center justify-center text-xs font-bold text-navy-900">
+                    {userProfile?.displayName?.charAt(0).toUpperCase()}
+                  </div>
                 )}
-              </button>
+                <button
+                  onClick={() => setMobileMenuOpen((open) => !open)}
+                  className="flex items-center justify-center p-2 rounded-lg text-gray-300 hover:text-gold-400 hover:bg-navy-800/50 transition"
+                  aria-label="Toggle menu"
+                >
+                  {mobileMenuOpen ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18.3 5.71a1 1 0 0 0-1.41-1.42L12 9.17 7.11 4.29A1 1 0 0 0 5.7 5.7L10.59 10.6 5.7 15.49a1 1 0 0 0 1.41 1.42L12 11.41l4.89 4.89a1 1 0 0 0 1.41-1.42L13.41 10.6l4.89-4.89z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4 5h16a1 1 0 110 2H4a1 1 0 110-2zm0 6h16a1 1 0 110 2H4a1 1 0 110-2zm0 6h16a1 1 0 110 2H4a1 1 0 110-2z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
 
               <div className="relative hidden sm:block" ref={dropdownRef}>
                 <button
