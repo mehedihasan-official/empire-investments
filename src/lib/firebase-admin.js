@@ -1,108 +1,61 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 
-let adminApp;
-let initError = null;
+// ── Lazy initialization — runs only when first request comes in ───────────
+// NOT at module load time, so build-time missing env vars won't break it
+function getAdminApp() {
+  // Return existing app if already initialized
+  if (getApps().length > 0) return getApps()[0];
 
-// Function to parse the private key from environment variable
-function parsePrivateKey() {
-  let key = process.env.FIREBASE_PRIVATE_KEY;
+  const projectId   = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const rawKey      = process.env.FIREBASE_PRIVATE_KEY;
 
-  if (!key) {
-    throw new Error("FIREBASE_PRIVATE_KEY is not set");
+  if (!projectId || !clientEmail || !rawKey) {
+    throw new Error(
+      `Firebase Admin env vars missing: projectId=${!!projectId} clientEmail=${!!clientEmail} privateKey=${!!rawKey}`
+    );
   }
 
-  // Remove surrounding quotes if present (happens when pasted into Vercel UI)
-  if (key.startsWith('"') && key.endsWith('"')) {
-    key = key.slice(1, -1);
+  // Handle all private key formats Vercel might produce:
+  let privateKey = rawKey;
+
+  // 1. Strip surrounding quotes Vercel sometimes wraps around the value
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.slice(1, -1);
   }
 
-  // Handle different newline formats
-  // 1) If the env var uses actual newline characters (multiline value), keep as-is
-  if (key.includes('\n') && !key.includes('\\n')) {
-    return key;
+  // 2. Convert escaped \n to real newlines (most common Vercel issue)
+  if (privateKey.includes("\\n")) {
+    privateKey = privateKey.replace(/\\n/g, "\n");
   }
 
-  // 2) If the env var has escaped newlines (literal backslash+n), convert them
-  if (key.includes('\\n')) {
-    key = key.replace(/\\n/g, '\n');
+  // 3. Verify the key looks valid before trying to use it
+  if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+    throw new Error("FIREBASE_PRIVATE_KEY does not contain expected PEM header. Check Vercel env var format.");
   }
 
-  // 3) If the env var has escaped backslash sequences (double slash), normalize them
-  if (key.includes('\\\\n')) {
-    key = key.replace(/\\\\n/g, '\n');
-  }
-
-  // If no newlines at all, it might be a single line - try to format it
-  if (!key.includes('\n') && key.includes('-----BEGIN PRIVATE KEY-----')) {
-    // This might be a malformed key - try to add newlines
-    key = key.replace(/-----BEGIN PRIVATE KEY-----/, '-----BEGIN PRIVATE KEY-----\n');
-    key = key.replace(/-----END PRIVATE KEY-----/, '\n-----END PRIVATE KEY-----\n');
-    // Add newlines every ~64 characters for base64 content
-    const lines = key.split('\n');
-    const formattedLines = lines.map(line => {
-      if (line.length > 64 && !line.includes('-----')) {
-        return line.match(/.{1,64}/g).join('\n');
-      }
-      return line;
-    });
-    key = formattedLines.join('\n');
-  }
-
-  return key;
-}
-
-// Initialize Firebase Admin once
-try {
-  if (getApps().length === 0) {
-    const privateKey = parsePrivateKey();
-
-    adminApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: privateKey,
-      }),
-    });
-    console.log("✓ Firebase Admin initialized successfully");
-  } else {
-    adminApp = getApps()[0];
-    console.log("✓ Firebase Admin already initialized, reusing instance");
-  }
-} catch (error) {
-  initError = error;
-  console.error("✗ Firebase Admin initialization failed:", {
-    message: error.message,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
+  return initializeApp({
+    credential: cert({ projectId, clientEmail, privateKey }),
   });
 }
 
-// Verify ID token
+// ── Verify a Firebase ID token ────────────────────────────────────────────
 export async function verifyToken(token) {
-  if (initError) {
-    console.error("Cannot verify token: Firebase Admin failed to initialize", initError.message);
-    return null;
-  }
-
-  if (!adminApp) {
-    console.error("Cannot verify token: adminApp is not initialized");
-    return null;
-  }
-
+  if (!token) return null;
   try {
-    const decodedToken = await getAuth(adminApp).verifyIdToken(token);
-    return decodedToken;
-  } catch (error) {
-    console.error("Token verification failed:", {
-      message: error.message,
-      code: error.code,
-      tokenLength: token?.length,
-    });
+    const app = getAdminApp();
+    return await getAuth(app).verifyIdToken(token);
+  } catch (err) {
+    console.error("[firebase-admin] verifyToken error:", err.message);
     return null;
   }
 }
 
-// Export the admin app instance if needed for other operations
-export { adminApp };
+// ── Extract Bearer token from request and verify ──────────────────────────
+export async function verifyRequest(request) {
+  const header = request.headers.get("authorization") || request.headers.get("Authorization");
+  if (!header?.startsWith("Bearer ")) return null;
+  const token = header.replace("Bearer ", "").trim();
+  return verifyToken(token);
+}

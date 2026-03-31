@@ -8,10 +8,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser]               = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -19,13 +19,14 @@ export function AuthProvider({ children }) {
         if (firebaseUser) {
           setUser(firebaseUser);
 
-          // Force-refresh token — critical right after Google popup closes
+          // IMPORTANT: Use getIdToken(true) to force-refresh the token.
+          // After Google popup closes, the token may not be ready yet.
+          // Without true, stale/invalid tokens cause 401 errors.
           const token = await firebaseUser.getIdToken(true);
 
-          // POST to /api/auth/register instead of GET /api/auth/me
-          // Reason: GET fails with 404 for brand-new Google users because
-          // they don't exist in MongoDB yet when onAuthStateChanged fires.
-          // POST does upsert — works for both new AND returning users.
+          // IMPORTANT: Call POST /api/auth/register, NOT GET /api/auth/me.
+          // GET returns 401/404 for new users who don't exist in MongoDB yet.
+          // POST does an upsert — creates new users AND updates returning users.
           const response = await fetch("/api/auth/register", {
             method: "POST",
             headers: {
@@ -34,7 +35,7 @@ export function AuthProvider({ children }) {
             },
             body: JSON.stringify({
               displayName: firebaseUser.displayName || "",
-              photoURL: firebaseUser.photoURL || "",
+              photoURL:    firebaseUser.photoURL    || "",
             }),
           });
 
@@ -42,6 +43,9 @@ export function AuthProvider({ children }) {
             const userData = await response.json();
             setUserProfile(userData.user);
             Cookie.set("auth_token", token, { expires: 7 });
+          } else {
+            const errData = await response.json().catch(() => ({}));
+            console.error("AuthProvider: register failed", response.status, errData);
           }
         } else {
           setUser(null);
@@ -86,8 +90,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }
