@@ -10,6 +10,7 @@ export const metadata = {
     "Planes de Vida Indexada Universal (IUL) y Protección Hipotecaria para la comunidad hispana en los EE.UU. Consulta gratuita, sin compromiso.",
   keywords:
     "IUL, seguro de vida indexada, protección hipotecaria, seguro hispano, Empire Investments",
+  icon: "/favicon.ico",
   openGraph: {
     title: "Empire Investments | Seguro de Vida IUL",
     description:
