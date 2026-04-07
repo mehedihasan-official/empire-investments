@@ -2,6 +2,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { FacebookPixelProvider } from "@/components/FacebookPixel";
 import Footer from "@/components/ui/Footer";
 import Header from "@/components/ui/Header";
+import { Script } from "next/script";
 import "./globals.css";
 
 export const metadata = {
@@ -23,6 +24,27 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Meta Pixel Code */}
+        {process.env.NEXT_PUBLIC_FB_PIXEL_ID && (
+          <Script
+            id="facebook-pixel"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${process.env.NEXT_PUBLIC_FB_PIXEL_ID}');
+                fbq('track', 'PageView');
+              `,
+            }}
+          />
+        )}
         {/* Facebook Pixel noscript fallback */}
         {process.env.NEXT_PUBLIC_FB_PIXEL_ID && (
           <noscript>
