@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID;
 
@@ -35,7 +35,7 @@ export function FacebookPixelProvider() {
         window,
         document,
         "script",
-        "https://connect.facebook.net/en_US/fbevents.js"
+        "https://connect.facebook.net/en_US/fbevents.js",
       );
 
       window.fbq("init", PIXEL_ID);
@@ -53,6 +53,35 @@ export function trackLeadEvent(eventId) {
   if (typeof window !== "undefined" && window.fbq && PIXEL_ID) {
     // eventID must match the server-side event_id for deduplication
     window.fbq("track", "Lead", {}, { eventID: eventId });
+  }
+}
+
+// ─── General event tracker with server-side sync ─────────────────────────────
+export async function trackEvent(eventName, params = {}, userData = {}) {
+  if (typeof window === "undefined") return;
+
+  // Generate unique event_id for deduplication
+  const eventId = crypto.randomUUID();
+
+  // Fire browser Pixel event
+  if (window.fbq && PIXEL_ID) {
+    window.fbq("track", eventName, params, { eventID: eventId });
+  }
+
+  // Send to server-side CAPI for reliability (Safari, etc.)
+  try {
+    await fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventName,
+        eventId,
+        params,
+        userData, // Raw user data, hashed on server
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to send event to server:", error);
   }
 }
 
