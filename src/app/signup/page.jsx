@@ -58,8 +58,8 @@ export default function SignUp() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Get ID token
-      const token = await result.user.getIdToken();
+      // Get a fresh ID token to avoid stale authentication state.
+      const token = await result.user.getIdToken(true);
 
       // Register user in MongoDB
       const response = await fetch("/api/auth/register", {
@@ -117,8 +117,8 @@ export default function SignUp() {
         displayName: formData.displayName,
       });
 
-      // Get ID token
-      const token = await userCredential.user.getIdToken();
+      // Get a fresh ID token to avoid stale auth state.
+      const token = await userCredential.user.getIdToken(true);
 
       // Register user in MongoDB
       const response = await fetch("/api/auth/register", {

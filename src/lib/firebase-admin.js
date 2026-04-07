@@ -36,8 +36,9 @@ function normalizePrivateKey(rawKey) {
 // ── Lazy initialization — runs only when first request comes in ───────────
 // NOT at module load time, so build-time missing env vars won't break it
 function getAdminApp() {
-  // Return existing app if already initialized
-  if (getApps().length > 0) return getApps()[0];
+  if (getApps().length > 0) {
+    return getApps()[0];
+  }
 
   const projectId   = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -45,15 +46,21 @@ function getAdminApp() {
 
   if (!projectId || !clientEmail || !rawKey) {
     throw new Error(
-      `Firebase Admin env vars missing: projectId=${!!projectId} clientEmail=${!!clientEmail} privateKey=${!!rawKey}`
+      `[firebase-admin] Missing Firebase Admin env vars. projectId=${!!projectId} clientEmail=${!!clientEmail} privateKey=${!!rawKey}`
     );
   }
 
   const privateKey = normalizePrivateKey(rawKey);
-
-  return initializeApp({
+  const app = initializeApp({
     credential: cert({ projectId, clientEmail, privateKey }),
   });
+
+  console.log("[firebase-admin] initialized", {
+    projectId,
+    clientEmail: !!clientEmail,
+  });
+
+  return app;
 }
 
 // ── Verify a Firebase ID token ────────────────────────────────────────────
@@ -70,8 +77,11 @@ export async function verifyToken(token) {
 
 // ── Extract Bearer token from request and verify ──────────────────────────
 export async function verifyRequest(request) {
-  const header = request.headers.get("authorization") || request.headers.get("Authorization");
-  if (!header?.startsWith("Bearer ")) return null;
+  const header = request.headers.get("authorization") ?? request.headers.get("Authorization");
+  if (!header?.startsWith("Bearer ")) {
+    console.warn("[firebase-admin] verifyRequest missing Bearer token");
+    return null;
+  }
   const token = header.replace("Bearer ", "").trim();
   return verifyToken(token);
 }

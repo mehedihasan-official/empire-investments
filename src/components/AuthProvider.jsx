@@ -20,17 +20,35 @@ export function AuthProvider({ children }) {
       try {
         if (firebaseUser) {
           setUser(firebaseUser);
-          // Get user profile from MongoDB
-          const token = await firebaseUser.getIdToken();
+
+          // Force refresh the ID token to avoid stale / invalid tokens.
+          const token = await firebaseUser.getIdToken(true);
+
           const response = await fetch("/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              displayName: firebaseUser.displayName || "",
+              photoURL: firebaseUser.photoURL || "",
+            }),
           });
 
-          if (response.ok) {
-            const userData = await response.json();
-            setUserProfile(userData.user);
-            Cookie.set("auth_token", token, { expires: 7 });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error(
+              "AuthProvider /api/auth/me failed:",
+              response.status,
+              errorData,
+            );
+            throw new Error(errorData.error || "Unable to sync user profile");
           }
+
+          const userData = await response.json();
+          setUserProfile(userData.user);
+          Cookie.set("auth_token", token, { expires: 7 });
         } else {
           setUser(null);
           setUserProfile(null);

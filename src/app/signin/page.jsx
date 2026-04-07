@@ -47,8 +47,8 @@ export default function SignIn() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Get ID token
-      const token = await result.user.getIdToken();
+      // Get a fresh ID token to avoid stale authentication state.
+      const token = await result.user.getIdToken(true);
 
       // Register or get user profile from MongoDB (creates if not exists)
       const response = await fetch("/api/auth/register", {
@@ -105,8 +105,8 @@ export default function SignIn() {
         formData.password,
       );
 
-      // Get user role from MongoDB to determine redirect
-      const token = await userCredential.user.getIdToken();
+      // Get a fresh ID token to avoid stale auth state.
+      const token = await userCredential.user.getIdToken(true);
       const response = await fetch("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -250,7 +250,7 @@ export default function SignIn() {
 
           {/* Sign Up Link */}
           <p className="text-center text-gray-400 text-sm mt-8">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/signup"
               className="text-gold-400 hover:text-gold-300 font-semibold transition"

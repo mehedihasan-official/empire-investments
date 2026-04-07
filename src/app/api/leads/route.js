@@ -68,6 +68,8 @@ export async function POST(request) {
     if (pixelId && accessToken) {
       console.log("Sending CAPI event...");
 
+      const eventId = body.eventId || crypto.randomUUID();
+
       const fbResponse = await fetch(
         `https://graph.facebook.com/v18.0/${pixelId}/events?access_token=${accessToken}`,
         {
@@ -78,18 +80,16 @@ export async function POST(request) {
               {
                 event_name: "Lead",
                 event_time: Math.floor(Date.now() / 1000),
+                event_id: eventId,
                 action_source: "website",
                 event_source_url: "https://www.vtrcacerescapital.com",
-
-                // ✅ IMPORTANT
-                test_event_code: "TEST31392",
-
                 user_data: {
                   client_ip_address: request.headers.get("x-forwarded-for") || "",
                   client_user_agent: request.headers.get("user-agent") || "",
                 },
               },
             ],
+            test_event_code: "TEST31392",
           }),
         }
       );
