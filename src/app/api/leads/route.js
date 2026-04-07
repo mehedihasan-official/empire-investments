@@ -62,59 +62,43 @@ export async function POST(request) {
     const leadId = result.insertedId.toString();
 
     // ── Facebook Conversions API (Server-Side Event) ─────────────────────────
-    const pixelId = process.env.FB_PIXEL_ID;
+    const pixelId = process.env.NEXT_PUBLIC_FB_PIXEL_ID;
     const accessToken = process.env.FB_ACCESS_TOKEN;
 
     if (pixelId && accessToken) {
-      const nameParts = nombre.trim().split(" ");
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || "";
+      console.log("Sending CAPI event...");
 
-      const fbPayload = {
-        data: [
-          {
-            event_name: 'Lead',
-            event_id: body.eventId,          // ← same ID from browser
-            event_time: Math.floor(Date.now() / 1000),
-            event_source_url: 'https://www.vtrcacerescapital.com',
-            action_source: 'website',
-            user_data: {
-              em: [hash(body.email || '')],   // ← hashed email if collected
-              fn: [hash(firstName)],  // ← hashed first name
-              ln: [hash(lastName)],  // ← hashed last name
-              st: [hash(body.estado || '')],  // ← hashed state
-              client_ip_address: request.headers.get('x-forwarded-for'),
-              client_user_agent: request.headers.get('user-agent'),
-            },
-            custom_data: {
-              content_name: 'IUL Lead Form',
-              content_category: 'Insurance'
-            }
-          }
-        ],
-        // Only include test_event_code if set in env (remove in production)
-        ...(process.env.FB_TEST_EVENT_CODE && {
-          test_event_code: process.env.FB_TEST_EVENT_CODE,
-        }),
-      };
+      const fbResponse = await fetch(
+        `https://graph.facebook.com/v18.0/${pixelId}/events?access_token=${accessToken}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            data: [
+              {
+                event_name: "Lead",
+                event_time: Math.floor(Date.now() / 1000),
+                action_source: "website",
+                event_source_url: "https://www.vtrcacerescapital.com",
 
-      try {
-        const fbResponse = await fetch(
-          `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fbPayload),
-          }
-        );
+                // ✅ IMPORTANT
+                test_event_code: "TEST31392",
 
-        if (!fbResponse.ok) {
-          const fbError = await fbResponse.json();
-          console.error("Facebook CAPI error:", fbError);
+                user_data: {
+                  client_ip_address: request.headers.get("x-forwarded-for") || "",
+                  client_user_agent: request.headers.get("user-agent") || "",
+                },
+              },
+            ],
+          }),
         }
-      } catch (fbError) {
-        // Don't fail the request if FB API has issues — lead is already saved
-        console.error("Facebook CAPI request failed:", fbError.message);
+      );
+
+      const fbData = await fbResponse.json();
+      console.log("Meta response:", fbData);
+
+      if (!fbResponse.ok) {
+        console.error("Facebook CAPI error:", fbData);
       }
     }
 
