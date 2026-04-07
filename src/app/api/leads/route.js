@@ -3,13 +3,8 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 // ─── Hash helper for Facebook Conversions API ────────────────────────────────
-function sha256(value) {
-  if (!value) return "";
-  return crypto
-    .createHash("sha256")
-    .update(String(value).trim().toLowerCase())
-    .digest("hex");
-}
+const hash = (val) => crypto.createHash('sha256')
+  .update(val.trim().toLowerCase()).digest('hex');
 
 // ─── POST /api/leads ─────────────────────────────────────────────────────────
 export async function POST(request) {
@@ -78,26 +73,24 @@ export async function POST(request) {
       const fbPayload = {
         data: [
           {
-            event_name: "Lead",
+            event_name: 'Lead',
+            event_id: body.eventId,          // ← same ID from browser
             event_time: Math.floor(Date.now() / 1000),
-            event_id: leadId, // used for deduplication with client-side pixel
-            event_source_url: "https://your-domain.com", // ← update with your real domain
-            action_source: "website",
+            event_source_url: 'https://www.vtrcacerescapital.com',
+            action_source: 'website',
             user_data: {
-              fn: firstName ? [sha256(firstName)] : [],
-              ln: lastName ? [sha256(lastName)] : [],
-              st: [sha256(estado)],
-              client_user_agent: userAgent || "",
+              em: [hash(body.email || '')],   // ← hashed email if collected
+              fn: [hash(firstName)],  // ← hashed first name
+              ln: [hash(lastName)],  // ← hashed last name
+              st: [hash(body.estado || '')],  // ← hashed state
+              client_ip_address: request.headers.get('x-forwarded-for'),
+              client_user_agent: request.headers.get('user-agent'),
             },
             custom_data: {
-              lead_type: "IUL",
-              investment_range: cuantoInvertir,
-              has_iul: tieneIUL,
-              current_investment_vehicle: dondeInvierte,
-              language: "es",
-              target_audience: "Hispanic",
-            },
-          },
+              content_name: 'IUL Lead Form',
+              content_category: 'Insurance'
+            }
+          }
         ],
         // Only include test_event_code if set in env (remove in production)
         ...(process.env.FB_TEST_EVENT_CODE && {

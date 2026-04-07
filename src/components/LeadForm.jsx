@@ -1,6 +1,5 @@
 "use client";
 
-import { trackLeadEvent } from "@/components/FacebookPixel";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -134,12 +133,29 @@ export default function LeadForm() {
     setLoading(true);
 
     try {
+      // 1. Generate event_id client-side
+      const eventId = crypto.randomUUID();
+
+      // 2. Fire pixel with the same ID
+      if (typeof window !== "undefined" && window.fbq) {
+        window.fbq(
+          "track",
+          "Lead",
+          {
+            content_name: "IUL Lead Form",
+            content_category: "Insurance",
+          },
+          { eventID: eventId },
+        );
+      }
+
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
           userAgent: navigator.userAgent,
+          eventId,
         }),
       });
 
@@ -148,9 +164,6 @@ export default function LeadForm() {
       if (!res.ok) {
         throw new Error(data.error || "Error al enviar el formulario.");
       }
-
-      // Fire client-side FB Lead event (deduplication with server-side CAPI)
-      trackLeadEvent(data.id);
 
       // Redirect to thank you page
       router.push("/gracias");
