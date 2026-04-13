@@ -65,10 +65,25 @@ function getAdminApp() {
 
 // ── Verify a Firebase ID token ────────────────────────────────────────────
 export async function verifyToken(token) {
-  if (!token) return null;
+  if (!token) {
+    console.warn("[firebase-admin] verifyToken: empty token");
+    return null;
+  }
+
   try {
     const app = getAdminApp();
-    return await getAuth(app).verifyIdToken(token);
+    const decodedToken = await getAuth(app).verifyIdToken(token);
+    
+    // Ensure the token has a uid
+    if (!decodedToken || !decodedToken.uid) {
+      console.warn("[firebase-admin] verifyToken: decoded token missing uid", {
+        hasToken: !!decodedToken,
+        keys: decodedToken ? Object.keys(decodedToken) : [],
+      });
+      return null;
+    }
+    
+    return decodedToken;
   } catch (err) {
     console.error("[firebase-admin] verifyToken error:", err.message);
     return null;
@@ -79,9 +94,15 @@ export async function verifyToken(token) {
 export async function verifyRequest(request) {
   const header = request.headers.get("authorization") ?? request.headers.get("Authorization");
   if (!header?.startsWith("Bearer ")) {
-    console.warn("[firebase-admin] verifyRequest missing Bearer token");
+    console.warn("[firebase-admin] verifyRequest: missing or invalid Bearer token header");
     return null;
   }
+
   const token = header.replace("Bearer ", "").trim();
+  if (!token) {
+    console.warn("[firebase-admin] verifyRequest: Bearer token is empty");
+    return null;
+  }
+
   return verifyToken(token);
 }

@@ -85,6 +85,7 @@ export function AuthProvider({ children }) {
     error,
     isAuthenticated: !!user,
     isAdmin: userProfile?.role === "admin",
+    isUser: userProfile?.role === "user",
     logout,
   };
 
