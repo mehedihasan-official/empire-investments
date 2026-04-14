@@ -48,9 +48,9 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const leadId = Array.isArray(params.id) ? params.id[0] : params.id;
-    const normalizedLeadId = typeof leadId === "string" ? leadId.trim() : "";
-    if (!ObjectId.isValid(normalizedLeadId)) {
+    const resolvedParams = await params;
+    const leadId = decodeURIComponent(resolvedParams?.id || "");
+    if (!leadId || !ObjectId.isValid(leadId)) {
       return NextResponse.json(
         { success: false, error: "Invalid lead ID" },
         { status: 400 }
@@ -61,7 +61,7 @@ export async function DELETE(request, { params }) {
     const db = client.db("empire_investments");
     const leadsCollection = db.collection("leads");
 
-    const result = await leadsCollection.deleteOne({ _id: new ObjectId(normalizedLeadId) });
+    const result = await leadsCollection.deleteOne({ _id: new ObjectId(leadId) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
