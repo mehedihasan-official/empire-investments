@@ -3,7 +3,7 @@
 import { useAuth } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const US_STATES = [
   "Alabama",
@@ -66,6 +66,27 @@ export default function AdminLeadsPage() {
   const [iuLFilter, setIULFilter] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedLead, setSelectedLead] = useState(null);
+  const [toast, setToast] = useState(null);
+  const toastTimerRef = useRef(null);
+
+  const showToast = (message, type = "success") => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    setToast({ message, type });
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+      toastTimerRef.current = null;
+    }, 2200);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, []);
 
   // ── Fetch leads ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -130,6 +151,7 @@ export default function AdminLeadsPage() {
       if (selectedLead?._id === leadId) {
         setSelectedLead(null);
       }
+      showToast("Deleted");
     } catch (err) {
       setError(err.message);
     }
@@ -138,6 +160,19 @@ export default function AdminLeadsPage() {
   return (
     <ProtectedRoute adminOnly={true}>
       <main className="min-h-screen pt-16 bg-navy-900 flex">
+        {toast && (
+          <div className="pointer-events-none fixed right-6 top-24 z-50">
+            <div
+              className={`rounded-md border px-4 py-2 text-sm font-semibold shadow-lg transition-all duration-300 ${
+                toast.type === "success"
+                  ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-200"
+                  : "border-red-400/40 bg-red-500/15 text-red-200"
+              }`}
+            >
+              {toast.message}
+            </div>
+          </div>
+        )}
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <aside
           className={`${
