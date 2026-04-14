@@ -38,7 +38,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    const token = authHeader.replace("Bearer ", "").trim();
     const decodedToken = await verifyAdminToken(token);
 
     if (!decodedToken) {
@@ -48,8 +48,9 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const userId = params.id;
-    if (!ObjectId.isValid(userId)) {
+    const userId = Array.isArray(params.id) ? params.id[0] : params.id;
+    const normalizedUserId = typeof userId === "string" ? userId.trim() : "";
+    if (!ObjectId.isValid(normalizedUserId)) {
       return NextResponse.json(
         { success: false, error: "Invalid user ID" },
         { status: 400 }
@@ -71,7 +72,7 @@ export async function PUT(request, { params }) {
     const usersCollection = db.collection("users");
 
     const result = await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
+      { _id: new ObjectId(normalizedUserId) },
       { $set: { role, updatedAt: new Date() } }
     );
 
@@ -105,7 +106,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    const token = authHeader.replace("Bearer ", "").trim();
     const decodedToken = await verifyAdminToken(token);
 
     if (!decodedToken) {
@@ -115,8 +116,9 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const userId = params.id;
-    if (!ObjectId.isValid(userId)) {
+    const userId = Array.isArray(params.id) ? params.id[0] : params.id;
+    const normalizedUserId = typeof userId === "string" ? userId.trim() : "";
+    if (!ObjectId.isValid(normalizedUserId)) {
       return NextResponse.json(
         { success: false, error: "Invalid user ID" },
         { status: 400 }
@@ -127,7 +129,7 @@ export async function DELETE(request, { params }) {
     const db = client.db("empire_investments");
     const usersCollection = db.collection("users");
 
-    const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
+    const result = await usersCollection.deleteOne({ _id: new ObjectId(normalizedUserId) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
