@@ -1,6 +1,5 @@
 import { verifyToken } from "@/lib/firebase-admin";
-import clientPromise from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import { AdminAuthError, getAdminContext } from "@/lib/admin-auth";
 import { NextResponse } from "next/server";
 
 // ──── Verify Token and Check Admin ──────────────────────────────────────

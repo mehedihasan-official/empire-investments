@@ -64,6 +64,10 @@ function getAdminApp() {
 }
 
 // ── Verify a Firebase ID token ────────────────────────────────────────────
+export function getAdminAuth() {
+  return getAuth(getAdminApp());
+}
+
 export async function verifyToken(token) {
   if (!token) {
     console.warn("[firebase-admin] verifyToken: empty token");
