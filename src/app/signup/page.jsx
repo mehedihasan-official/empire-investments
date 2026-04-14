@@ -61,8 +61,8 @@ export default function SignUp() {
       // Get a fresh ID token to avoid stale authentication state.
       const token = await result.user.getIdToken(true);
 
-      // Register user in MongoDB
-      const response = await fetch("/api/auth/register", {
+      // Sync user profile in MongoDB and return the saved role
+      const response = await fetch("/api/auth/me", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,9 +79,12 @@ export default function SignUp() {
 
       setSuccessMessage("Account created successfully! Redirecting...");
 
+      const data = await response.json();
+      const isAdmin = data.user?.role === "admin";
+
       // Redirect after a short delay to show success message
       setTimeout(() => {
-        router.push("/dashboard/user");
+        router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
       }, 1500);
     } catch (error) {
       setServerError(
@@ -120,8 +123,8 @@ export default function SignUp() {
       // Get a fresh ID token to avoid stale auth state.
       const token = await userCredential.user.getIdToken(true);
 
-      // Register user in MongoDB
-      const response = await fetch("/api/auth/register", {
+      // Sync user profile in MongoDB and return the saved role
+      const response = await fetch("/api/auth/me", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -138,9 +141,12 @@ export default function SignUp() {
 
       setSuccessMessage("Account created successfully! Redirecting...");
 
+      const data = await response.json();
+      const isAdmin = data.user?.role === "admin";
+
       // Redirect after a short delay to show success message
       setTimeout(() => {
-        router.push("/dashboard/user");
+        router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
       }, 1500);
     } catch (error) {
       setServerError(

@@ -27,7 +27,7 @@ async function upsertUser(decodedToken, data) {
     updatedAt: new Date(),
   };
 
-  const result = await usersCollection.findOneAndUpdate(
+  await usersCollection.findOneAndUpdate(
     { uid: decodedToken.uid },
     {
       $set: userFields,
@@ -39,11 +39,13 @@ async function upsertUser(decodedToken, data) {
     { upsert: true, returnDocument: "after" }
   );
 
-  if (!result || !result.value) {
+  const user = await usersCollection.findOne({ uid: decodedToken.uid });
+
+  if (!user) {
     throw new Error("Failed to upsert user");
   }
 
-  return result.value;
+  return user;
 }
 
 export async function GET(request) {

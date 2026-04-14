@@ -50,8 +50,8 @@ export default function SignIn() {
       // Get a fresh ID token to avoid stale authentication state.
       const token = await result.user.getIdToken(true);
 
-      // Register or get user profile from MongoDB (creates if not exists)
-      const response = await fetch("/api/auth/register", {
+      // Sync user profile in MongoDB and return the saved role
+      const response = await fetch("/api/auth/me", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,21 +108,31 @@ export default function SignIn() {
       // Get a fresh ID token to avoid stale auth state.
       const token = await userCredential.user.getIdToken(true);
       const response = await fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          displayName: userCredential.user.displayName || "",
+          photoURL: userCredential.user.photoURL || "",
+        }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setSuccessMessage("Successfully signed in! Redirecting...");
-        const isAdmin = data.user?.role === "admin";
-
-        // Redirect after a short delay to show success message
-        setTimeout(() => {
-          router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
-        }, 1500);
-      } else {
-        router.push("/dashboard/user");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const serverMessage = errorData?.error || `HTTP ${response.status}`;
+        throw new Error(`Failed to authenticate user: ${serverMessage}`);
       }
+
+      const data = await response.json();
+      setSuccessMessage("Successfully signed in! Redirecting...");
+      const isAdmin = data.user?.role === "admin";
+
+      // Redirect after a short delay to show success message
+      setTimeout(() => {
+        router.push(isAdmin ? "/dashboard/admin" : "/dashboard/user");
+      }, 1500);
     } catch (error) {
       setServerError(
         error.code === "auth/user-not-found"
