@@ -1,5 +1,6 @@
 import { verifyToken } from "@/lib/firebase-admin";
 import clientPromise from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
 // ──── Verify Token and Check Admin ──────────────────────────────────────
@@ -15,6 +16,7 @@ async function verifyAdminToken(token) {
     const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ uid: decodedToken.uid });
+
     if (!user || user.role !== "admin") {
       return null;
     }
@@ -26,8 +28,7 @@ async function verifyAdminToken(token) {
   }
 }
 
-// ──── GET /api/admin/leads (List all leads) ────────────────────────────
-export async function GET(request) {
+export async function DELETE(request, { params }) {
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -39,6 +40,7 @@ export async function GET(request) {
 
     const token = authHeader.replace("Bearer ", "");
     const decodedToken = await verifyAdminToken(token);
+
     if (!decodedToken) {
       return NextResponse.json(
         { success: false, error: "Admin access required" },
@@ -46,44 +48,33 @@ export async function GET(request) {
       );
     }
 
-    const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
-    const estado = searchParams.get("estado");
-    const tieneIUL = searchParams.get("tieneIUL");
+    const leadId = params.id;
+    if (!ObjectId.isValid(leadId)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid lead ID" },
+        { status: 400 }
+      );
+    }
 
     const client = await clientPromise();
     const db = client.db("empire_investments");
     const leadsCollection = db.collection("leads");
 
-    const filter = {};
-    if (estado) {
-      filter.estado = estado;
-    }
-    if (tieneIUL) {
-      filter.tieneIUL = tieneIUL;
-    }
+    const result = await leadsCollection.deleteOne({ _id: new ObjectId(leadId) });
 
-    const total = await leadsCollection.countDocuments(filter);
-    const leads = await leadsCollection
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .toArray();
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { success: false, error: "Lead not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      leads,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
+      message: "Lead deleted successfully",
     });
   } catch (error) {
-    console.error("GET /api/admin/leads error:", error);
+    console.error("DELETE /api/admin/leads/[id] error:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

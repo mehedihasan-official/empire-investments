@@ -69,12 +69,13 @@ export default function AdminLeadsPage() {
   // ── Fetch leads ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetchLeads();
-  }, [page, estadoFilter, iuLFilter]);
+  }, [user, page, estadoFilter, iuLFilter]);
 
   const fetchLeads = async () => {
     try {
+      setError("");
       setLoading(true);
-      const token = await user?.getIdToken();
+      const token = await user?.getIdToken(true);
       if (!token) return;
 
       const query = new URLSearchParams({
@@ -88,7 +89,10 @@ export default function AdminLeadsPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch leads");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch leads");
+      }
 
       const data = await response.json();
       setLeads(data.leads || []);
@@ -104,7 +108,7 @@ export default function AdminLeadsPage() {
     if (!confirm("Are you sure you want to delete this lead?")) return;
 
     try {
-      const token = await user?.getIdToken();
+      const token = await user?.getIdToken(true);
       if (!token) return;
 
       const response = await fetch(`/api/admin/leads/${leadId}`, {
@@ -112,7 +116,10 @@ export default function AdminLeadsPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) throw new Error("Failed to delete lead");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete lead");
+      }
 
       fetchLeads();
     } catch (err) {

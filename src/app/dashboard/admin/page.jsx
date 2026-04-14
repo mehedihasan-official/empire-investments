@@ -4,13 +4,51 @@ import { useAuth } from "@/components/AuthProvider";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
-  const { userProfile, logout } = useAuth();
+  const { user, userProfile, logout } = useAuth();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [userCount, setUserCount] = useState("-");
+  const [leadCount, setLeadCount] = useState("-");
+
+  useEffect(() => {
+    const fetchDashboardCounts = async () => {
+      try {
+        if (!user) return;
+
+        const token = await user.getIdToken(true);
+        if (!token) return;
+
+        const [usersRes, leadsRes] = await Promise.all([
+          fetch("/api/users?page=1&limit=1", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch("/api/admin/leads?page=1&limit=1", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        if (!usersRes.ok || !leadsRes.ok) {
+          return;
+        }
+
+        const [usersData, leadsData] = await Promise.all([
+          usersRes.json(),
+          leadsRes.json(),
+        ]);
+
+        setUserCount(usersData.pagination?.total ?? "-");
+        setLeadCount(leadsData.pagination?.total ?? "-");
+      } catch (error) {
+        console.error("Failed to load dashboard counts:", error);
+      }
+    };
+
+    fetchDashboardCounts();
+  }, [user]);
 
   // ── Handle logout ───────────────────────────────────────────────────────
   const handleLogout = async () => {
@@ -163,7 +201,9 @@ export default function AdminDashboard() {
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-gold-400 mb-2">-</p>
+                <p className="text-3xl font-bold text-gold-400 mb-2">
+                  {userCount}
+                </p>
                 <p className="text-gray-400 text-sm">Manage user accounts</p>
               </Link>
 
@@ -189,7 +229,9 @@ export default function AdminDashboard() {
                     />
                   </svg>
                 </div>
-                <p className="text-3xl font-bold text-gold-400 mb-2">-</p>
+                <p className="text-3xl font-bold text-gold-400 mb-2">
+                  {leadCount}
+                </p>
                 <p className="text-gray-400 text-sm">View and manage leads</p>
               </Link>
 

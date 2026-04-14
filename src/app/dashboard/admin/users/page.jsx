@@ -17,12 +17,13 @@ export default function AdminUsersPage() {
   // ── Fetch users ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetchUsers();
-  }, [page, roleFilter]);
+  }, [user, page, roleFilter]);
 
   const fetchUsers = async () => {
     try {
+      setError("");
       setLoading(true);
-      const token = await user?.getIdToken();
+      const token = await user?.getIdToken(true);
       if (!token) return;
 
       const query = new URLSearchParams({
@@ -35,7 +36,10 @@ export default function AdminUsersPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch users");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch users");
+      }
 
       const data = await response.json();
       setUsers(data.users || []);
@@ -49,7 +53,7 @@ export default function AdminUsersPage() {
   // ── Update user role ────────────────────────────────────────────────────
   const updateUserRole = async (userId, newRole) => {
     try {
-      const token = await user?.getIdToken();
+      const token = await user?.getIdToken(true);
       if (!token) return;
 
       const response = await fetch(`/api/users/${userId}`, {
@@ -61,7 +65,10 @@ export default function AdminUsersPage() {
         body: JSON.stringify({ role: newRole }),
       });
 
-      if (!response.ok) throw new Error("Failed to update user");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update user");
+      }
 
       // Refresh users list
       fetchUsers();
@@ -75,7 +82,7 @@ export default function AdminUsersPage() {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const token = await user?.getIdToken();
+      const token = await user?.getIdToken(true);
       if (!token) return;
 
       const response = await fetch(`/api/users/${userId}`, {
@@ -83,9 +90,11 @@ export default function AdminUsersPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) throw new Error("Failed to delete user");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete user");
+      }
 
-      // Refresh users list
       fetchUsers();
     } catch (err) {
       setError(err.message);
