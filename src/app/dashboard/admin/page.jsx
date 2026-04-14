@@ -10,7 +10,7 @@ export default function AdminDashboard() {
   const { user, userProfile, logout } = useAuth();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userCount, setUserCount] = useState("-");
   const [leadCount, setLeadCount] = useState("-");
 
@@ -65,16 +65,23 @@ export default function AdminDashboard() {
   return (
     <ProtectedRoute adminOnly={true}>
       <main className="min-h-screen pt-16 bg-navy-900 flex">
+        {sidebarOpen && (
+          <button
+            aria-label="Close sidebar overlay"
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <aside
-          className={`${
-            sidebarOpen ? "w-64" : "w-20"
-          } bg-navy-800 border-r border-gold-500/20 transition-all duration-300 fixed h-[calc(100vh-64px)] overflow-y-auto z-40`}
+          className={`fixed left-0 top-16 z-40 h-[calc(100vh-64px)] w-64 overflow-y-auto border-r border-gold-500/20 bg-navy-800 transition-transform duration-300 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
         >
           <div className="p-6">
             {/* Toggle Button */}
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => setSidebarOpen(false)}
               className="w-full p-2 hover:bg-gold-400/10 rounded transition mb-8"
             >
               <svg
@@ -95,11 +102,9 @@ export default function AdminDashboard() {
             {/* Navigation Menu */}
             <nav className="space-y-2">
               <div>
-                {sidebarOpen && (
-                  <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4">
-                    Main
-                  </p>
-                )}
+                <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4">
+                  Main
+                </p>
                 <Link
                   href="/dashboard/admin"
                   className="flex items-center gap-3 px-4 py-3 text-white hover:bg-gold-400/10 rounded transition"
@@ -111,16 +116,14 @@ export default function AdminDashboard() {
                   >
                     <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                   </svg>
-                  {sidebarOpen && <span>Dashboard</span>}
+                  <span>Dashboard</span>
                 </Link>
               </div>
 
               <div>
-                {sidebarOpen && (
-                  <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4 mt-6">
-                    Management
-                  </p>
-                )}
+                <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4 mt-6">
+                  Management
+                </p>
                 <Link
                   href="/dashboard/admin/users"
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gold-400/10 rounded transition"
@@ -132,7 +135,7 @@ export default function AdminDashboard() {
                   >
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                   </svg>
-                  {sidebarOpen && <span>Users</span>}
+                  <span>Users</span>
                 </Link>
 
                 <Link
@@ -151,7 +154,7 @@ export default function AdminDashboard() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  {sidebarOpen && <span>Leads</span>}
+                  <span>Leads</span>
                 </Link>
               </div>
             </nav>
@@ -159,31 +162,40 @@ export default function AdminDashboard() {
         </aside>
 
         {/* ── Main Content ─────────────────────────────────────────────────── */}
-        <div
-          className={`${sidebarOpen ? "ml-64" : "ml-20"} flex-1 transition-all duration-300`}
-        >
-          <div className="p-8">
+        <div className="flex-1 lg:ml-64">
+          <div className="p-4 sm:p-6 lg:p-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-12">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
+                <h1 className="text-3xl font-bold text-white sm:text-4xl mb-2">
                   Admin Dashboard
                 </h1>
                 <p className="text-gray-400">
                   Welcome, {userProfile?.displayName}
                 </p>
               </div>
-              <button
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className="btn-gold px-6 py-2.5 text-sm font-semibold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {loggingOut ? "Signing Out..." : "Sign Out"}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="rounded border border-gold-400/40 p-2 text-gold-400 lg:hidden"
+                  aria-label="Open menu"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="btn-gold px-4 py-2 text-xs sm:px-6 sm:py-2.5 sm:text-sm font-semibold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {loggingOut ? "Signing Out..." : "Sign Out"}
+                </button>
+              </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-10 sm:mb-12">
               {/* Users Card */}
               <Link
                 href="/dashboard/admin/users"
@@ -257,8 +269,8 @@ export default function AdminDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">
+            <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-4 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">
                 Quick Actions
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

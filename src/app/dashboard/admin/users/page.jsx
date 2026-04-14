@@ -12,7 +12,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState("all");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const toastTimerRef = useRef(null);
 
@@ -147,15 +147,23 @@ export default function AdminUsersPage() {
             </div>
           </div>
         )}
+        {sidebarOpen && (
+          <button
+            aria-label="Close sidebar overlay"
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <aside
-          className={`${
-            sidebarOpen ? "w-64" : "w-20"
-          } bg-navy-800 border-r border-gold-500/20 transition-all duration-300 fixed h-[calc(100vh-64px)] overflow-y-auto z-40`}
+          className={`fixed left-0 top-16 z-40 h-[calc(100vh-64px)] w-64 overflow-y-auto border-r border-gold-500/20 bg-navy-800 transition-transform duration-300 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
         >
           <div className="p-6">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => setSidebarOpen(false)}
               className="w-full p-2 hover:bg-gold-400/10 rounded transition mb-8"
             >
               <svg
@@ -175,11 +183,9 @@ export default function AdminUsersPage() {
 
             <nav className="space-y-2">
               <div>
-                {sidebarOpen && (
-                  <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4">
-                    Main
-                  </p>
-                )}
+                <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4">
+                  Main
+                </p>
                 <Link
                   href="/dashboard/admin"
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gold-400/10 rounded transition"
@@ -191,16 +197,14 @@ export default function AdminUsersPage() {
                   >
                     <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                   </svg>
-                  {sidebarOpen && <span>Dashboard</span>}
+                  <span>Dashboard</span>
                 </Link>
               </div>
 
               <div>
-                {sidebarOpen && (
-                  <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4 mt-6">
-                    Management
-                  </p>
-                )}
+                <p className="text-xs font-semibold text-gold-400 uppercase tracking-wider mb-4 mt-6">
+                  Management
+                </p>
                 <Link
                   href="/dashboard/admin/users"
                   className="flex items-center gap-3 px-4 py-3 text-white bg-gold-400/10 rounded transition"
@@ -212,7 +216,7 @@ export default function AdminUsersPage() {
                   >
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                   </svg>
-                  {sidebarOpen && <span>Users</span>}
+                  <span>Users</span>
                 </Link>
 
                 <Link
@@ -231,7 +235,7 @@ export default function AdminUsersPage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  {sidebarOpen && <span>Leads</span>}
+                  <span>Leads</span>
                 </Link>
               </div>
             </nav>
@@ -239,17 +243,24 @@ export default function AdminUsersPage() {
         </aside>
 
         {/* ── Main Content ─────────────────────────────────────────────────── */}
-        <div
-          className={`${sidebarOpen ? "ml-64" : "ml-20"} flex-1 transition-all duration-300`}
-        >
-          <div className="p-8">
+        <div className="flex-1 lg:ml-64">
+          <div className="p-4 sm:p-6 lg:p-8">
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-6 flex items-start justify-between gap-4">
               <h1 className="text-3xl font-bold text-white mb-2">
                 Users Management
               </h1>
-              <p className="text-gray-400">Manage and control user accounts</p>
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="rounded border border-gold-400/40 p-2 text-gold-400 lg:hidden"
+                aria-label="Open menu"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             </div>
+            <p className="mb-6 text-sm text-gray-400 sm:text-base">Manage and control user accounts</p>
 
             {/* Error Message */}
             {error && (
@@ -259,7 +270,7 @@ export default function AdminUsersPage() {
             )}
 
             {/* Filters */}
-            <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-6 mb-6">
+            <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-4 sm:p-6 mb-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
@@ -283,7 +294,7 @@ export default function AdminUsersPage() {
 
             {/* Users Table */}
             <div className="bg-navy-800 border border-gold-500/20 rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gold-500/20 bg-navy-700/50">
@@ -381,10 +392,53 @@ export default function AdminUsersPage() {
                   </tbody>
                 </table>
               </div>
+              {!loading && users.length > 0 && (
+                <div className="space-y-3 p-3 md:hidden">
+                  {users.map((u) => (
+                    <div key={u._id} className="rounded-lg border border-gold-500/20 bg-navy-700/40 p-4">
+                      <div className="mb-2 text-white font-semibold">{u.displayName}</div>
+                      <div className="mb-3 text-sm text-gray-300 break-all">{u.email}</div>
+                      <div className="mb-3">
+                        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-400">Role</label>
+                        <select
+                          value={u.role}
+                          onChange={(e) => updateUserRole(u._id, e.target.value)}
+                          className="w-full px-3 py-2 bg-navy-700 border border-gray-600 text-white rounded text-sm focus:outline-none focus:border-gold-400"
+                        >
+                          <option value="user">User</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-400">
+                        <span>
+                          Joined{" "}
+                          {new Date(u.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <button
+                          onClick={() => deleteUser(u._id)}
+                          className="text-red-400 hover:text-red-300 transition text-sm font-semibold"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {loading && (
+                <div className="p-6 text-center text-gray-400 md:hidden">Loading users...</div>
+              )}
+              {!loading && users.length === 0 && (
+                <div className="p-6 text-center text-gray-400 md:hidden">No users found</div>
+              )}
             </div>
 
             {/* Pagination */}
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}

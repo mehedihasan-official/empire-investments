@@ -25,29 +25,29 @@ export default function UserDashboard() {
 
   return (
     <ProtectedRoute>
-      <main className="min-h-screen pt-24 bg-navy-900">
-        <div className="max-w-6xl mx-auto px-4 py-12">
+      <main className="min-h-screen pt-20 sm:pt-24 bg-navy-900">
+        <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
           {/* Header */}
-          <div className="flex items-center justify-between mb-12">
+          <div className="mb-8 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 Welcome back, {userProfile?.displayName?.split(" ")[0]}!
               </h1>
-              <p className="text-gray-400">Manage your Empire account</p>
+              <p className="text-sm sm:text-base text-gray-400">Manage your Empire account</p>
             </div>
             <button
               onClick={handleLogout}
               disabled={loggingOut}
-              className="btn-gold px-6 py-2.5 text-sm font-semibold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="btn-gold w-full sm:w-auto px-6 py-2.5 text-sm font-semibold uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {loggingOut ? "Signing Out..." : "Sign Out"}
             </button>
           </div>
 
           {/* Profile Card */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-10 sm:mb-12">
             <div className="md:col-span-1">
-              <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-6 sticky top-24">
+              <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-5 sm:p-6 md:sticky md:top-24">
                 <div className="text-center">
                   {user?.photoURL ? (
                     <img
@@ -73,8 +73,8 @@ export default function UserDashboard() {
 
             {/* Main Content */}
             <div className="md:col-span-2">
-              <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-8">
-                <h3 className="text-2xl font-bold text-white mb-6">
+              <div className="bg-navy-800 border border-gold-500/20 rounded-lg p-5 sm:p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
                   Account Information
                 </h3>
 
@@ -84,7 +84,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Full Name
                     </label>
-                    <p className="text-white text-lg">
+                    <p className="text-white text-base sm:text-lg">
                       {userProfile?.displayName}
                     </p>
                   </div>
@@ -93,14 +93,14 @@ export default function UserDashboard() {
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Email Address
                     </label>
-                    <p className="text-white text-lg">{user?.email}</p>
+                    <p className="text-white text-base sm:text-lg break-all">{user?.email}</p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Account Type
                     </label>
-                    <p className="text-white text-lg capitalize">
+                    <p className="text-white text-base sm:text-lg capitalize">
                       {userProfile?.role || "Regular User"}
                     </p>
                   </div>
@@ -109,7 +109,7 @@ export default function UserDashboard() {
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Member Since
                     </label>
-                    <p className="text-white text-lg">
+                    <p className="text-white text-base sm:text-lg">
                       {userProfile?.createdAt
                         ? new Date(userProfile.createdAt).toLocaleDateString(
                             "en-US",
@@ -128,7 +128,7 @@ export default function UserDashboard() {
           </div>
 
           {/* Quick Links */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <Link
               href="/"
               className="bg-navy-800 border border-gold-500/20 rounded-lg p-6 hover:border-gold-400/50 transition"
