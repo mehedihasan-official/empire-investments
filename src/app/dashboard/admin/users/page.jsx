@@ -16,13 +16,15 @@ export default function AdminUsersPage() {
 
   // ── Fetch users ─────────────────────────────────────────────────────────
   useEffect(() => {
-    fetchUsers();
+    fetchUsers({ showLoading: true });
   }, [user, page, roleFilter]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async ({ showLoading = false } = {}) => {
     try {
       setError("");
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       const token = await user?.getIdToken(true);
       if (!token) return;
 
@@ -46,7 +48,9 @@ export default function AdminUsersPage() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -70,8 +74,11 @@ export default function AdminUsersPage() {
         throw new Error(errorData.error || "Failed to update user");
       }
 
-      // Refresh users list
-      fetchUsers();
+      setUsers((prevUsers) =>
+        prevUsers.map((u) =>
+          u._id === userId ? { ...u, role: newRole, updatedAt: new Date() } : u
+        )
+      );
     } catch (err) {
       setError(err.message);
     }
@@ -95,7 +102,7 @@ export default function AdminUsersPage() {
         throw new Error(errorData.error || "Failed to delete user");
       }
 
-      fetchUsers();
+      setUsers((prevUsers) => prevUsers.filter((u) => u._id !== userId));
     } catch (err) {
       setError(err.message);
     }

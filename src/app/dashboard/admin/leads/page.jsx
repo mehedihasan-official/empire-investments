@@ -65,16 +65,19 @@ export default function AdminLeadsPage() {
   const [estadoFilter, setEstadoFilter] = useState("");
   const [iuLFilter, setIULFilter] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedLead, setSelectedLead] = useState(null);
 
   // ── Fetch leads ─────────────────────────────────────────────────────────
   useEffect(() => {
-    fetchLeads();
+    fetchLeads({ showLoading: true });
   }, [user, page, estadoFilter, iuLFilter]);
 
-  const fetchLeads = async () => {
+  const fetchLeads = async ({ showLoading = false } = {}) => {
     try {
       setError("");
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       const token = await user?.getIdToken(true);
       if (!token) return;
 
@@ -99,7 +102,9 @@ export default function AdminLeadsPage() {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -121,7 +126,10 @@ export default function AdminLeadsPage() {
         throw new Error(errorData.error || "Failed to delete lead");
       }
 
-      fetchLeads();
+      setLeads((prevLeads) => prevLeads.filter((lead) => lead._id !== leadId));
+      if (selectedLead?._id === leadId) {
+        setSelectedLead(null);
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -375,12 +383,20 @@ export default function AdminLeadsPage() {
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <button
-                              onClick={() => deleteLead(lead._id)}
-                              className="text-red-400 hover:text-red-300 transition text-sm font-semibold"
-                            >
-                              Delete
-                            </button>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => setSelectedLead(lead)}
+                                className="text-blue-400 hover:text-blue-300 transition text-sm font-semibold"
+                              >
+                                Details
+                              </button>
+                              <button
+                                onClick={() => deleteLead(lead._id)}
+                                className="text-red-400 hover:text-red-300 transition text-sm font-semibold"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -410,6 +426,75 @@ export default function AdminLeadsPage() {
             </div>
           </div>
         </div>
+
+        {selectedLead && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+            <div className="w-full max-w-2xl rounded-lg border border-gold-500/20 bg-navy-800 p-6 shadow-xl">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Lead Details</h2>
+                <button
+                  onClick={() => setSelectedLead(null)}
+                  className="text-gray-400 transition hover:text-white"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Name</p>
+                  <p className="text-white">{selectedLead.nombre || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">State</p>
+                  <p className="text-white">{selectedLead.estado || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Age</p>
+                  <p className="text-white">{selectedLead.edad ?? "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Has IUL</p>
+                  <p className="text-white">{selectedLead.tieneIUL || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Investment Source
+                  </p>
+                  <p className="text-white">{selectedLead.dondeInvierte || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
+                    Amount to Invest
+                  </p>
+                  <p className="text-white">{selectedLead.cuantoInvertir || "-"}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">IUL Purpose</p>
+                  <p className="text-white">{selectedLead.paraQueIUL || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Source</p>
+                  <p className="text-white">{selectedLead.source || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Created At</p>
+                  <p className="text-white">
+                    {selectedLead.createdAt
+                      ? new Date(selectedLead.createdAt).toLocaleString("en-US")
+                      : "-"}
+                  </p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Metadata</p>
+                  <pre className="mt-1 max-h-40 overflow-auto rounded bg-navy-900 p-3 text-xs text-gray-300">
+                    {JSON.stringify(selectedLead.metadata || {}, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </ProtectedRoute>
   );
